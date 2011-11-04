@@ -23,7 +23,7 @@ var client Client
 
 func init() {
     runtime.GOMAXPROCS(2)
-    client.Addr = "127.0.0.1:7379"
+    client.Addr = "127.0.0.1:6379"
     client.Db = 13
 }
 

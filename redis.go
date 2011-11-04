@@ -187,11 +187,13 @@ func (client *Client) sendCommand(cmd string, args ...string) (data interface{},
     // grab a connection from the pool
     c, err := client.popCon()
 
+    var b []byte
+
     if err != nil {
         goto End
     }
 
-    b := commandBytes(cmd, args...)
+    b = commandBytes(cmd, args...)
     data, err = client.rawSend(c, b)
     if err == os.EOF || err == os.EPIPE {
         c, err = client.openConnection()
@@ -214,11 +216,14 @@ func (client *Client) sendCommands(cmdArgs <-chan []string, data chan<- interfac
     // grab a connection from the pool
     c, err := client.popCon()
 
+    var reader *bufio.Reader
+    var errs chan os.Error
+
     if err != nil {
         goto End
     }
 
-    reader := bufio.NewReader(c)
+    reader = bufio.NewReader(c)
 
     // Ping first to verify connection is open
     err = writeRequest(c, "PING")
@@ -242,7 +247,7 @@ func (client *Client) sendCommands(cmdArgs <-chan []string, data chan<- interfac
         }
     }
 
-    errs := make(chan os.Error)
+    errs = make(chan os.Error)
 
     go func() {
         for cmdArg := range cmdArgs {
